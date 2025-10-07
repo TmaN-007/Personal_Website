@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Monitoring System - Gautham</title>
+    <link rel="icon" type="image/x-icon" href="images/GJ_Logo.ico">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="sticky-top bg-white shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="images/GJ_Logo.ico" alt="GJ Logo" style="height: 40px; width: auto;">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About Me</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="resume.html">Resume</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="projects.html">Projects</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-consultation" href="contact.html">Contact Me</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 mx-auto">
+                        <a href="projects.html" class="btn btn-outline-primary mb-4">← Back to Projects</a>
+
+                        <article class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+                            <h1 class="mb-4">Patient Monitoring System (PIC + ESP32 IoT)</h1>
+
+                            <div class="project-content">
+                                <p>The Patient Monitoring System was inspired by the growing demand for accessible healthcare solutions that provide real-time data to both providers and family members. My motivation came from observing how delays in data access can affect patient outcomes and how critical it is for healthcare systems to monitor conditions continuously rather than relying solely on periodic check-ups. I wanted to explore how IoT technology could be leveraged to bridge that gap, creating a system that could collect, transmit, and display patient data in a way that is both reliable and user-friendly.</p>
+
+                                <p>I based the design on the PIC18F4525 microcontroller, which provided a solid foundation for handling multiple sensors. I integrated an array of sensors to collect health data such as heart rate, temperature, and other key metrics. Ensuring accuracy and reliability of these readings was crucial, since healthcare applications demand a higher level of trust in the system than most consumer technologies.</p>
+
+                                <p>Programming the system in C gave me control over the low-level operations, which was necessary for real-time performance. To ensure that data could be accessed remotely, I integrated an ESP32 chip that enabled both Bluetooth and Wi-Fi transmission. This meant that healthcare providers or family members could view the patient's condition on a smartphone in real time, rather than waiting until a hospital visit. I also designed an intuitive interface on an LCD screen, which displayed readings directly on the device itself, giving patients or caregivers immediate feedback.</p>
+
+                                <p>The project was not just about functionality but about user experience. I wanted the system to be simple enough for patients or family members without technical backgrounds to use confidently. The LCD interface was designed with clarity in mind, showing essential data without clutter. Remote access was tested to ensure that data could be viewed seamlessly, whether nearby over Bluetooth or from a greater distance over Wi-Fi.</p>
+
+                                <p>What I accomplished through this project was more than just connecting sensors to a microcontroller. I created an integrated system that demonstrated how IoT can play a role in advancing healthcare accessibility. The system allowed continuous monitoring, reducing the risk of missed warning signs, and providing reassurance to families who wanted to keep an eye on their loved ones.</p>
+
+                                <p>Working on this reinforced my interest in embedded systems and IoT, but it also highlighted the ethical responsibility of engineers designing healthcare technologies. Accuracy, reliability, and usability were just as important as the technical challenge itself. I came away with a stronger appreciation for how engineering projects can contribute to patient safety and quality of life. This project gave me a glimpse into how innovation in healthcare technology can directly improve outcomes, and it strengthened my resolve to pursue opportunities where I can apply my skills to critical, real-world problems.</p>
+                            </div>
+
+                            <div class="mt-5">
+                                <h3 class="h5 mb-3">Key Highlights</h3>
+                                <ul>
+                                    <li>PIC18F4525 microcontroller for reliable sensor management</li>
+                                    <li>Multiple health sensors for heart rate, temperature, and vital signs</li>
+                                    <li>Programmed in C for real-time performance and low-level control</li>
+                                    <li>ESP32 integration for Bluetooth and Wi-Fi connectivity</li>
+                                    <li>Remote monitoring via smartphone for healthcare providers and family</li>
+                                    <li>Intuitive LCD interface for immediate on-device feedback</li>
+                                    <li>Focus on accuracy, reliability, and user-friendly design</li>
+                                    <li>Continuous monitoring system to reduce missed warning signs</li>
+                                </ul>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-4">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Gautham Jayakrishnan. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
