@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Gautham - Digital Experience Designer{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 order-lg-1 order-2">
+                <div class="hero-text">
+                    <h1 class="fw-normal mb-4">Hey, I'm Gautham.</h1>
+                    <p class="tagline fs-4 mb-4">Still treading water in life, but at least the Wi-Fi signal's strong out here.</p>
+                    <a href="{{ url_for('about') }}" class="btn btn-primary btn-lg px-5 rounded-pill">Learn More About Me</a>
+                </div>
+            </div>
+            <div class="col-lg-6 order-lg-2 order-1">
+                <div class="hero-image text-center">
+                    <img src="{{ url_for('static', filename='images/Profile_Image.jpg') }}" alt="Gautham Jayakrishnan profile pic" class="img-fluid rounded-4 shadow">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

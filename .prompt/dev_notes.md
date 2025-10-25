@@ -287,3 +287,319 @@ I learned pretty quickly that vague prompts got vague results. When I said thing
 The weirdest part was figuring out how much to trust it. Sometimes the AI would suggest something that looked fine at first glance but didn't quite make sense when I thought about usability or accessibility. I had to review everything it generated and make judgment calls about what to keep and what to change.
 
 In the end, I think I found a good balance. I handled the big-picture stuff—deciding on the overall structure, color scheme, and which features to include—while the AI handled the tedious stuff like updating copyright notices or swapping logos across multiple files. It's like having an assistant who's really fast but needs supervision. You can get a lot done quickly, but you can't just set it and forget it. Human oversight still matters, especially for design choices and making sure the user experience actually makes sense.
+
+---
+
+## Prompt 6: Flask Conversion with SQLite DAL and Image Upload
+
+**Prompt:**
+You are an expert Flask developer. Convert my small Flask site into a templated app with a SQLite DAL and a Projects feature that reads from and writes to a DB, including **image upload** to `static/images/`. Follow the assignment and use my instructor's class examples as the coding style reference.
+
+Use these class examples as style references:
+* Routing + rendering pattern (`application.py` using `render_template`, `request`, and DAL calls). Use the same GET/POST handler structure for the form page.
+* Simple DAL functions pattern that return **lists of dictionaries** and use `sqlite3` (see `getAllMovies`).
+* Insert + select functions in the DAL (`saveMovieDB`, `getAllMovies`) as a model for our projects table.
+* Package versions for Flask stack (requirements). Keep compatible with these versions unless there's a good reason.
+
+**AI Suggestion:**
+
+Created **DAL.py** with clean separation:
+```python
+import sqlite3
+
+def get_connection(db_path="projects.db"):
+    """Get database connection with row factory"""
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    """Initialize database and create projects table if it doesn't exist"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS projects(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            image_filename TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def insert_project(title, description, image_filename):
+    """Insert a new project into the database"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO projects (title, description, image_filename)
+        VALUES (?, ?, ?)
+    ''', (title, description, image_filename))
+    conn.commit()
+    conn.close()
+
+def get_projects():
+    """Get all projects ordered by created_at DESC, returns list of dicts"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT id, title, description, image_filename, created_at
+        FROM projects
+        ORDER BY created_at DESC
+    ''')
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Convert Row objects to dictionaries
+    projects = []
+    for row in rows:
+        projects.append({
+            'id': row['id'],
+            'title': row['title'],
+            'description': row['description'],
+            'image_filename': row['image_filename'],
+            'created_at': row['created_at']
+        })
+    return projects
+```
+
+Updated **app.py** with proper Flask configuration:
+```python
+from flask import Flask, render_template, request, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+from pathlib import Path
+import os
+import secrets
+import DAL
+
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'
+
+# Upload configuration
+app.config['UPLOAD_FOLDER'] = Path('static/images')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def save_image(file_storage):
+    """Save uploaded image with validation and unique naming"""
+    if not file_storage or file_storage.filename == '':
+        return None
+    if not allowed_file(file_storage.filename):
+        return None
+
+    filename = secure_filename(file_storage.filename)
+    upload_folder = Path(app.config['UPLOAD_FOLDER'])
+    upload_folder.mkdir(parents=True, exist_ok=True)
+
+    # Add unique suffix if file exists
+    file_path = upload_folder / filename
+    if file_path.exists():
+        name, ext = os.path.splitext(filename)
+        suffix = secrets.token_hex(3)
+        filename = f"{name}__{suffix}{ext}"
+        file_path = upload_folder / filename
+
+    file_storage.save(file_path)
+    return filename
+
+@app.route('/projects')
+def projects():
+    project_list = DAL.get_projects()
+    return render_template('projects.html', projects=project_list)
+
+@app.route('/projects/new', methods=['GET', 'POST'])
+def project_new():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        image = request.files.get('image')
+
+        # Validation
+        if not title or not description or not image:
+            flash('All fields are required', 'danger')
+            return render_template('project_form.html')
+
+        # Save image
+        saved_filename = save_image(image)
+        if not saved_filename:
+            flash('Invalid image file', 'danger')
+            return render_template('project_form.html')
+
+        # Insert into database
+        DAL.insert_project(title, description, saved_filename)
+        flash('Project added successfully!', 'success')
+        return redirect(url_for('projects'))
+
+    return render_template('project_form.html')
+```
+
+Created **templates/base.html** with shared layout:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gautham - Digital Experience Designer{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/GJ_Logo.ico') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="sticky-top bg-white shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='images/GJ_Logo.ico') }}" alt="GJ Logo" style="height: 40px;">
+                </a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+                        </li>
+                        <!-- More nav items with active state tracking -->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white text-center py-4">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Gautham Jayakrishnan. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+```
+
+Created **templates/projects.html** with database table:
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<section class="projects-section py-5">
+    <div class="container">
+        <h1 class="display-3 mb-3 text-center">Projects</h1>
+        <div class="text-center mb-5">
+            <a href="{{ url_for('project_new') }}" class="btn btn-primary btn-lg">Add New Project</a>
+        </div>
+
+        {% if projects %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th style="width: 200px;">Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in projects %}
+                    <tr>
+                        <td>{{ p.title }}</td>
+                        <td>{{ p.description }}</td>
+                        <td class="text-center">
+                            <img src="{{ url_for('static', filename='images/' ~ p.image_filename) }}"
+                                 alt="{{ p.title }}"
+                                 class="img-fluid"
+                                 style="max-height:150px;object-fit:contain;">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+```
+
+Created **templates/project_form.html** with image upload:
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+                    <h1 class="mb-4 text-center">Add New Project</h1>
+
+                    <form action="{{ url_for('project_new') }}" method="post"
+                          enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <label for="title" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="image" class="form-label">Project Image *</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                            <div class="form-text">Allowed: PNG, JPG, JPEG, GIF, WEBP (Max 5MB)</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg px-5">Add Project</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}
+```
+
+Updated **requirements.txt** to match instructor's versions:
+```
+Flask==3.0.3
+Werkzeug==3.0.4
+Jinja2==3.1.4
+itsdangerous==2.2.0
+MarkupSafe==3.0.1
+click==8.1.7
+blinker==1.8.2
+```
+
+**Reflection:** This was probably the most technically complex prompt I've done with AI so far. I was worried it would mess up the structure since I had to convert 11 static HTML pages into a Flask app with templates, but it actually handled it really well.
+
+The AI followed the instructor's coding style pretty closely. The DAL functions return lists of dictionaries just like the class examples, the route handlers follow the same GET/POST pattern, and it used `render_template` everywhere consistently. That was important because the assignment specifically said to match the class style.
+
+What impressed me most was the image upload implementation. The AI included proper validation (file type, size limits), security (using `secure_filename()`), and even added logic to append a unique suffix if a file already exists. That's the kind of detail I might have missed if I was rushing through it myself.
+
+The template inheritance with `base.html` cleaned up a ton of code duplication. Instead of having the navbar and footer repeated in 11 files, now it's all in one place. The active nav state tracking with `{% if request.endpoint == 'home' %}active{% endif %}` was a nice touch too—I didn't even ask for that specifically.
+
+One thing I had to debug was the virtual environment. The AI initially tried to run the app without activating venv, which threw a ModuleNotFoundError. But once I pointed that out, it fixed it immediately. The database seeding also needed a manual run to populate the initial projects, but that was more of a workflow thing than a code issue.
+
+The projects table view looks clean with Bootstrap's striped table styling, and the form validation uses HTML5 attributes plus Bootstrap's validation classes. The flash messages for success/error states work perfectly and auto-dismiss, which gives good user feedback.
+
+Overall, this conversion took what would have been several hours of manual refactoring and compressed it into maybe 30 minutes of prompting and testing. The AI understood the architecture I needed (DAL → Routes → Templates), implemented all the pieces correctly, and even caught edge cases like duplicate filenames. It's the kind of task where AI really shines—taking well-defined requirements and generating a lot of boilerplate code that follows consistent patterns. I still had to review everything and test it end-to-end, but the heavy lifting was done for me.

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}About Me - Gautham{% endblock %}
+
+{% block content %}
+<section class="about-section py-5">
+    <div class="container">
+        <h1 class="display-3 mb-5 text-center">About Me</h1>
+
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <div class="about-image">
+                    <img src="{{ url_for('static', filename='images/Moon 10_13_2024.jpg') }}" alt="Gautham - About Me Photo" class="img-fluid rounded-4 shadow">
+                    <p class="text-center mt-3 text-muted">The moon, October 13, 2024.</p>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('photography') }}" class="btn btn-outline-primary">See More of My Photography</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="about-text ps-lg-4">
+                    <p class="fs-5 text-justify">I'm Gautham, born and raised in Kerala, a place many call God's Own Country. Music has always been part of who I am, and I'm listening to it pretty much all the time. When I'm not wearing headphones, you'll probably catch me watching motorsports, from the most exciting races to even the not-so-great ones, just because I love it all. I also play the guitar, piano, trumpet, and drums, which has given me a creative outlet and a way to express myself outside of academics and work.</p>
+
+                    <p class="fs-5 text-justify">I find a lot of peace in nature, and it's often where I go to slow down and think. That balance between curiosity and calm shows up in my path too. I did my undergrad in Electrical Engineering at Purdue, and now I'm in graduate school at the Kelley School of Business, working on my Master's in Information Systems. I've always loved technology, but I realized what excites me even more is the people side of it, the way psychology, behavior, and human connection play such a big role in making technology meaningful. That's what pulled me into MSIS, where I get to work at the intersection of tech and people.</p>
+
+                    <p class="fs-5 text-justify">At the end of the day, I really enjoy helping others. Whether it's solving a problem, creating something useful, or just being there for someone, I want the work I do to make a difference.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
